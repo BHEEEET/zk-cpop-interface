@@ -1,0 +1,33 @@
+{
+  "name": "zk-cpop-interface",
+  "packageManager": "yarn@4.6.0",
+  "dependencies": {
+    "@lightprotocol/compressed-token": "^0.21.0",
+    "@lightprotocol/stateless.js": "^0.21.0",
+    "@lightprotocol/zk-compression-cli": "^0.23.0",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/spl-token-metadata": "^0.1.6",
+    "@solana/web3.js": "^1.98.2",
+    "dotenv": "^16.5.0",
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22.15.14",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "ts": "ts-node lib/index.ts",
+    "balance": "ts-node lib/balance.ts",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  }
+}
