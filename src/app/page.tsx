@@ -1,21 +1,25 @@
-'use client'; // Add this line
+"use client"; // Add this line
 
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import dynamic from "next/dynamic";
+// Dynamically import the WalletMultiButton component on the client only
+const WalletMultiButtonDynamic = dynamic(
+  async () =>
+    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+  { ssr: false }
+);
+import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
+import CreateEventForm from "@/components/CreateEventForm";
+
+
 
 export default function Home() {
-  const handleConnectWallet = () => {
-    alert("Wallet connection logic goes here");
-  };
-
-  const handleMintTokens = () => {
-    alert("Minting logic goes here");
-  };
+  const { publicKey } = useWallet();
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-      {/*  <Image
+        {/*  <Image
           className="dark:invert"
           src="/token-logo.svg" // Replace with your token logo
           alt="Token Logo"
@@ -28,28 +32,13 @@ export default function Home() {
           Welcome to the ZK cPOP platform
         </h1>
         <p className="text-center sm:text-left text-lg">
-          Mint your very own tokens now! Get started by following the simple steps below.
+          Make your own Proof of Participation token now! Cheaper and faster,
+          IBRL!
         </p>
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Connect your wallet by clicking the "Connect Wallet" button below.
-          </li>
-          <li className="tracking-[-.01em]">
-            Enter the number of tokens you wish to mint.
-          </li>
-          <li className="tracking-[-.01em]">
-            Click the "Mint Tokens" button to mint your tokens instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-        <WalletMultiButton />
-          <button
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            onClick={handleMintTokens}
-          >
-            Mint Tokens
-          </button>
+        <div className="flex flex-col gap-6 items-center sm:items-start w-full">
+          <WalletMultiButtonDynamic />
+          {publicKey && <CreateEventForm />}
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
