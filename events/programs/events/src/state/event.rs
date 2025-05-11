@@ -8,7 +8,6 @@ pub struct Event{
     pub name: String,
     #[max_len(100)]
     pub description: String,
-    pub fee: u16,
     pub rewards_bump: u8,
     pub bump: u8,
     pub reward_escrow_index: u8

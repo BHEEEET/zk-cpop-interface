@@ -10,7 +10,8 @@ declare_id!("9bzx1HunSwH6ME3MDpaBfnBqPUqpkar9ZYgpdz1meSgh");
 pub mod events {
     use super::*;
 
-    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, name: String, description: String) -> Result<()> {
+        ctx.accounts.init_event(name,description);
         Ok(())
     }
 }

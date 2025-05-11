@@ -7,9 +7,7 @@ use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::token_interface::{
     token_metadata_initialize, Mint, Token2022, TokenMetadataInitialize,
 };
-use spl_token_metadata_interface::state::TokenMetadata;
-use spl_type_length_value::variable_len_pack::VariableLenPack;
-use light_sd::{light_system_accounts, LightTraits};
+
 use light_compressed_account::instruction_data::compressed_proof::CompressedProof;
 use light_compressed_token::{
     process_transfer::{
@@ -18,8 +16,12 @@ use light_compressed_token::{
     },
     program::LightCompressedToken,
 };
+use light_sd::{light_system_accounts, LightTraits};
 use light_sdk::{light_system_accounts, LightTraits};
+use spl_token_metadata_interface::state::TokenMetadata;
+use spl_type_length_value::variable_len_pack::VariableLenPack;
 
+#[light_system_accounts]
 #[derive(Accounts, LightTraits)]
 #[instruction(name: String)]
 pub struct Initialize<'info> {
@@ -40,34 +42,25 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer = creator,
-        seeds = [b"event", name.as_bytes()],
+        seeds = [b"event",creator.key().as_ref(), name.as_bytes()],
         bump,
         space = Event::INIT_SPACE
     )]
     pub event: Account<'info, Event>,
+    // PASS the existing mint here as input
+    #[authority]
+    #[account(
+        seeds = [b"vault", creator.key().as_ref()],
+        bump
+    )]
+    pub vault: InterfaceAccount<'info, TokenAccount>,
+    pub compressed_token_program: Program<'info, LightCompressedToken>,
     pub token_program: Program<'info, Token2022>,
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> Initialize<'info> {
-    pub fn init(
-        &mut self,
-        name_event: String,
-        description_event: String,
-        fee: u16,
-        bumps: &InitializeBumps,
-        args: TokenMetadataArgs
-    ) -> Result<()> {
-        self.event.set_inner(Event {
-            creator: self.creator.key(),
-            name: name_event,
-            description: description_event,
-            fee,
-            rewards_bump: bumps.rewards_mint,
-            bump: bumps.event,
-            reward_escrow_index: todo!(),
-        });
-
+    pub fn mint_tokens(&mut self, args: TokenMetadataArgs, bumps: &InitializeBumps) -> Result<()>{
         let TokenMetadataArgs { name, symbol, uri } = args;
 
         let token_metedata = TokenMetadata {
@@ -93,22 +86,41 @@ impl<'info> Initialize<'info> {
             lamports,
         )?;
 
-            // Initialize token metadata
-    token_metadata_initialize(
-        CpiContext::new(
-            self.token_program.to_account_info(),
-            TokenMetadataInitialize {
-                program_id: self.token_program.to_account_info(),
-                mint: self.rewards_mint.to_account_info(),
-                metadata: self.rewards_mint.to_account_info(),
-                mint_authority: self.creator.to_account_info(),
-                update_authority: self.creator.to_account_info(),
-            },
-        ),
-        name,
-        symbol,
-        uri,
-    )?;
+        // Initialize token metadata
+        token_metadata_initialize(
+            CpiContext::new(
+                self.token_program.to_account_info(),
+                TokenMetadataInitialize {
+                    program_id: self.token_program.to_account_info(),
+                    mint: self.rewards_mint.to_account_info(),
+                    metadata: self.rewards_mint.to_account_info(),
+                    mint_authority: self.creator.to_account_info(),
+                    update_authority: self.creator.to_account_info(),
+                },
+            ),
+            name,
+            symbol,
+            uri,
+        )?;
+
+        Ok(())
+
+    }
+
+    pub fn init_event(
+        &mut self,
+        name_event: String,
+        description_event: String,
+        bumps: &InitializeBumps,
+    ) -> Result<()> {
+        self.event.set_inner(Event {
+            creator: self.creator.key(),
+            name: name_event,
+            description: description_event,
+            rewards_bump: bumps.rewards_mint,
+            bump: bumps.event,
+            reward_escrow_index: todo!(),
+        });
 
         Ok(())
     }
