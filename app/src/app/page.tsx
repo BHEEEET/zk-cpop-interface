@@ -10,6 +10,8 @@ const WalletMultiButtonDynamic = dynamic(
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import CreateEventForm from "@/components/CreateEventForm";
+import { WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
+import Airdrop from "@/components/Airdrop";
 
 
 
@@ -38,7 +40,8 @@ export default function Home() {
 
         <div className="flex flex-col gap-6 items-center sm:items-start w-full">
           <WalletMultiButtonDynamic />
-          {publicKey && <CreateEventForm />}
+          <WalletDisconnectButton/>
+          {publicKey && <div><CreateEventForm /> <Airdrop/></div>}
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
